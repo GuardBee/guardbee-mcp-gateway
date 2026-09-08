@@ -1,0 +1,37 @@
+{
+  "name": "@guardbee/mcp-db-gateway",
+  "version": "0.1.0",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx src/cli.ts",
+    "start": "node dist/cli.js",
+    "type-check": "tsc --noEmit"
+  },
+  "keywords": [
+    "mcp",
+    "llm",
+    "gateway",
+    "kvkk",
+    "gdpr",
+    "pii",
+    "database",
+    "security"
+  ],
+  "author": "",
+  "license": "MIT",
+  "description": "KVKK/GDPR-compliant MCP server gateway between LLMs and databases",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.30.0",
+    "zod": "^4.5.4"
+  },
+  "devDependencies": {
+    "@types/node": "^26.5.0",
+    "tsx": "^4.23.13",
+    "typescript": "^7.0.2"
+  },
+  "types": "dist/index.d.ts",
+  "bin": {
+    "guardbee-gateway": "dist/cli.js"
+  }
+}
