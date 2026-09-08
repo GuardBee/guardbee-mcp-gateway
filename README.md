@@ -3,6 +3,7 @@
 [![npm version](https://img.shields.io/npm/v/@guardbee/mcp-db-gateway.svg)](https://www.npmjs.com/package/@guardbee/mcp-db-gateway)
 [![npm downloads](https://img.shields.io/npm/dm/@guardbee/mcp-db-gateway.svg)](https://www.npmjs.com/package/@guardbee/mcp-db-gateway)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Smithery](https://smithery.ai/badge/guardbee/mcp-db-gateway)](https://smithery.ai/servers/guardbee/mcp-db-gateway)
 
 KVKK / GDPR uyumlu MCP (Model Context Protocol) sunucusu — LLM ile veritabanı arasına güvenlik katmanı ekler.
 
@@ -32,7 +33,11 @@ Claude ──► MCP Gateway ──► Veritabanı
 
 ## Hızlı Başlangıç
 
-### 1. Global Kurulum ile Claude Desktop'a Bağla
+### 1. Smithery ile Tek Tıkla Bağla
+
+[Smithery](https://smithery.ai/servers/guardbee/mcp-db-gateway) üzerinden Claude Desktop'a tek tıkla ekleyebilirsiniz.
+
+### 2. Global Kurulum ile Claude Desktop'a Bağla
 
 ```bash
 npm install -g @guardbee/mcp-db-gateway
@@ -58,7 +63,7 @@ npm install -g @guardbee/mcp-db-gateway
 
 Claude Desktop'ı yeniden başlatın. Demo veritabanı otomatik yüklenir, PII maskeleme aktif olur.
 
-### 2. Projede Kullan (Prisma)
+### 3. Projede Kullan (Prisma)
 
 ```bash
 npm install @guardbee/mcp-db-gateway
