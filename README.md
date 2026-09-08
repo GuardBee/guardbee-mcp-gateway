@@ -1,5 +1,9 @@
 # @guardbee/mcp-db-gateway
 
+[![npm version](https://img.shields.io/npm/v/@guardbee/mcp-db-gateway.svg)](https://www.npmjs.com/package/@guardbee/mcp-db-gateway)
+[![npm downloads](https://img.shields.io/npm/dm/@guardbee/mcp-db-gateway.svg)](https://www.npmjs.com/package/@guardbee/mcp-db-gateway)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+
 KVKK / GDPR uyumlu MCP (Model Context Protocol) sunucusu — LLM ile veritabanı arasına güvenlik katmanı ekler.
 
 Claude veya başka bir LLM, veritabanınızı doğrudan sorgulamak yerine bu gateway üzerinden geçer. Hassas alanlar otomatik olarak maskelenir, tablo erişimleri rol bazlı kontrol edilir, her sorgu audit log'a yazılır.
@@ -28,31 +32,37 @@ Claude ──► MCP Gateway ──► Veritabanı
 
 ## Hızlı Başlangıç
 
-### 1. Claude Desktop'a Bağla (Demo Modu)
+### 1. Global Kurulum ile Claude Desktop'a Bağla
 
 ```bash
-git clone https://github.com/GuardBee/guardbee-mcp-gateway
-cd guardbee-mcp-gateway
-npm install
-npm run build
+npm install -g @guardbee/mcp-db-gateway
 ```
 
-`~/Library/Application Support/Claude/claude_desktop_config.json` dosyasına ekleyin:
+`~/Library/Application Support/Claude/claude_desktop_config.json` dosyasına ekleyin (macOS):
 
 ```json
 {
   "mcpServers": {
     "guardbee-db-gateway": {
-      "command": "node",
-      "args": ["/path/to/guardbee-mcp-gateway/dist/cli.js"]
+      "command": "guardbee-gateway",
+      "env": {
+        "DATABASE_URL": "postgresql://user:pass@localhost:5432/mydb"
+      }
     }
   }
 }
 ```
 
+> **Windows:** `%APPDATA%\Claude\claude_desktop_config.json`
+> **Linux:** `~/.config/Claude/claude_desktop_config.json`
+
 Claude Desktop'ı yeniden başlatın. Demo veritabanı otomatik yüklenir, PII maskeleme aktif olur.
 
-### 2. Prisma ile Kullan
+### 2. Projede Kullan (Prisma)
+
+```bash
+npm install @guardbee/mcp-db-gateway
+```
 
 ```typescript
 import { PrismaClient } from "@prisma/client";
