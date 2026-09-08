@@ -2,15 +2,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { loadConfig, type GatewayConfig } from "./config";
 import { registerDbTools } from "./tools/db-tools";
-
-/**
- * Basit in-memory DB adapter — gerçek kullanımda Prisma veya pg ile değiştirilir.
- * createServer() fonksiyonunun ikinci parametresi olarak geçilir.
- */
-type DbAdapter = {
-  query(table: string, filter: Record<string, unknown>, limit: number): Promise<Record<string, unknown>[]>;
-  tables(): Promise<string[]>;
-};
+import type { DbAdapter } from "./types";
 
 export function createServer(
   configOverrides?: Partial<GatewayConfig>,

@@ -1,16 +1,8 @@
 import { z } from "zod";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { GatewayConfig } from "../config";
+import type { DbAdapter } from "../types";
 import { GatewayPipeline } from "../gateway/pipeline";
-
-/**
- * Minimal DB adapter — Prisma veya raw pg ile değiştirilebilir.
- * Şimdilik basit JSON sorgu arayüzü kullanıyor.
- */
-type DbAdapter = {
-  query(table: string, filter: Record<string, unknown>, limit: number): Promise<Record<string, unknown>[]>;
-  tables(): Promise<string[]>;
-};
 
 function formatResult(result: Awaited<ReturnType<GatewayPipeline["process"]>>): string {
   if ("denied" in result) {
