@@ -89,7 +89,7 @@ describe("createPrismaAdapter — query() filter ve limit", () => {
     const prismaWithDate = { event: dateDelegate };
     const a = createPrismaAdapter(prismaWithDate);
     await a.query("event", { createdAt: "2024-01-01T00:00:00Z" }, 10);
-    const callArgs = dateDelegate.findMany.mock.calls[0]?.[0];
+    const callArgs = (dateDelegate.findMany.mock.calls[0] as unknown as [{ where: Record<string, unknown> }] | undefined)?.[0];
     expect(callArgs?.where?.["createdAt"]).toBeInstanceOf(Date);
   });
 });
