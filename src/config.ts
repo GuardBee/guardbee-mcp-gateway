@@ -28,6 +28,29 @@ export const TableRuleSchema = z.object({
 });
 export type TableRule = z.infer<typeof TableRuleSchema>;
 
+export const RoleSchema = z.object({
+  name: z.string().min(1),
+
+  /**
+   * Beyaz liste: tanımlanmışsa sadece bu tablolara erişim açık.
+   * Tanımlanmamışsa tüm tablolar erişilebilir (denyTables hariç).
+   */
+  allowTables: z.array(z.string()).optional(),
+
+  /** Kara liste: bu tablolar bu rol için her zaman engellenir. */
+  denyTables: z.array(z.string()).optional(),
+
+  /**
+   * Rol bazlı field kuralları — global kuralların önünde uygulanır.
+   * Örnek: admin rolü için email alanını allow'a çekebilirsiniz.
+   */
+  fieldRules: z.array(FieldRuleSchema).optional(),
+
+  /** Bu rol için max satır limiti (global defaultMaxRows'un üzerine yazar). */
+  maxRows: z.number().int().positive().optional(),
+});
+export type Role = z.infer<typeof RoleSchema>;
+
 export const RateLimitConfigSchema = z.object({
   enabled: z.boolean().default(true),
   /** Pencere süresi (ms). Default: 60 saniye. */
@@ -96,6 +119,15 @@ export const GatewayConfigSchema = z.object({
   /** Rate limiting ayarları */
   rateLimit: RateLimitConfigSchema.default(() => ({ enabled: true, windowMs: 60_000, maxRequests: 100, maxRequestsPerTable: 20 })),
 
+  /** Tanımlı roller listesi */
+  roles: z.array(RoleSchema).default([]),
+
+  /**
+   * Aktif rol adı. GATEWAY_ROLE env var'ından veya config'den okunur.
+   * Eşleşen rol bulunamazsa ya da tanımlanmamışsa kısıtlama uygulanmaz.
+   */
+  activeRole: z.string().optional(),
+
   /** MCP server adı */
   serverName: z.string().default("guardbee-db-gateway"),
 });
@@ -107,6 +139,7 @@ export function loadConfig(overrides?: Partial<GatewayConfig>): GatewayConfig {
   const raw = {
     databaseUrl: process.env.DATABASE_URL ?? "",
     serverName: process.env.GATEWAY_SERVER_NAME,
+    activeRole: process.env.GATEWAY_ROLE,
     ...overrides,
   };
   return GatewayConfigSchema.parse(raw);

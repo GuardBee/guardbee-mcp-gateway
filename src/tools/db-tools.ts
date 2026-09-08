@@ -73,17 +73,22 @@ export function registerDbTools(
     {},
     async () => {
       const allTables = await db.tables();
-      const deniedTables = new Set(
-        config.tableRules
-          .filter((r) => r.access === "deny")
-          .map((r) => r.table)
+      // Global deny kuralları
+      const globalDenied = new Set(
+        config.tableRules.filter((r) => r.access === "deny").map((r) => r.table)
       );
-      const visible = allTables.filter((t) => !deniedTables.has(t));
+      const afterGlobal = allTables.filter((t) => !globalDenied.has(t));
+      // RBAC rol filtresi
+      const visible = pipeline.filterTables(afterGlobal);
       return {
         content: [
           {
             type: "text",
-            text: JSON.stringify({ tables: visible, hiddenByPolicy: allTables.length - visible.length }, null, 2),
+            text: JSON.stringify(
+              { tables: visible, hiddenByPolicy: allTables.length - visible.length },
+              null,
+              2
+            ),
           },
         ],
       };
@@ -144,13 +149,17 @@ export function registerDbTools(
             text: JSON.stringify(
               {
                 serverName: config.serverName,
+                activeRole: pipeline.activeRoleName ?? "none",
                 fieldRulesCount: config.fieldRules.length,
                 tableRulesCount: config.tableRules.length,
+                rolesCount: config.roles.length,
                 defaultMaxRows: config.defaultMaxRows,
                 auditEnabled: config.audit.enabled,
                 auditSink: config.audit.sink,
+                rateLimit: config.rateLimit,
                 fieldRules: config.fieldRules,
                 tableRules: config.tableRules,
+                roles: config.roles,
               },
               null,
               2
