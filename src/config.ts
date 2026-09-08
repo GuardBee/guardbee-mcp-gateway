@@ -28,6 +28,17 @@ export const TableRuleSchema = z.object({
 });
 export type TableRule = z.infer<typeof TableRuleSchema>;
 
+export const RateLimitConfigSchema = z.object({
+  enabled: z.boolean().default(true),
+  /** Pencere süresi (ms). Default: 60 saniye. */
+  windowMs: z.number().int().positive().default(60_000),
+  /** Pencere başına global max istek sayısı. Default: 100. */
+  maxRequests: z.number().int().positive().default(100),
+  /** Pencere başına tablo başına max istek sayısı. Default: 20. */
+  maxRequestsPerTable: z.number().int().positive().default(20),
+});
+export type RateLimitConfig = z.infer<typeof RateLimitConfigSchema>;
+
 export const AuditConfigSchema = z.object({
   enabled: z.boolean().default(true),
   /** "console" | "file" | "http" */
@@ -81,6 +92,9 @@ export const GatewayConfigSchema = z.object({
 
   /** Audit log ayarları */
   audit: AuditConfigSchema.default(() => ({ enabled: true, sink: "console" as const })),
+
+  /** Rate limiting ayarları */
+  rateLimit: RateLimitConfigSchema.default(() => ({ enabled: true, windowMs: 60_000, maxRequests: 100, maxRequestsPerTable: 20 })),
 
   /** MCP server adı */
   serverName: z.string().default("guardbee-db-gateway"),

@@ -6,7 +6,15 @@ import { GatewayPipeline } from "../gateway/pipeline";
 
 function formatResult(result: Awaited<ReturnType<GatewayPipeline["process"]>>): string {
   if ("denied" in result) {
-    return JSON.stringify({ error: result.reason, auditId: result.auditId }, null, 2);
+    return JSON.stringify(
+      {
+        error: result.reason,
+        auditId: result.auditId,
+        ...(result.retryAfterMs ? { retryAfterMs: result.retryAfterMs } : {}),
+      },
+      null,
+      2
+    );
   }
   return JSON.stringify(
     {

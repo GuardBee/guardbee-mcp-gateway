@@ -1,6 +1,7 @@
 import type { GatewayConfig } from "../config";
 import { maskRows } from "./masker";
 import { AuditLogger, createAuditEvent } from "../audit/logger";
+import { RateLimiter } from "../rate-limiter";
 
 export type QueryResult = {
   rows: Record<string, unknown>[];
@@ -13,18 +14,22 @@ export type DeniedResult = {
   denied: true;
   reason: string;
   auditId: string;
+  retryAfterMs?: number;
 };
 
 export class GatewayPipeline {
   private readonly audit: AuditLogger;
+  private readonly rateLimiter: RateLimiter;
 
   constructor(private readonly config: GatewayConfig) {
     this.audit = new AuditLogger(config.audit);
+    this.rateLimiter = new RateLimiter(config.rateLimit);
   }
 
   /**
    * Veriyi gateway üzerinden geçirir:
    *   1. Tablo erişim kontrolü
+   *   1.5. Rate limit kontrolü (global + per-table)
    *   2. PII / field maskeleme
    *   3. Row sayısı limiti
    *   4. Audit log
@@ -42,6 +47,29 @@ export class GatewayPipeline {
     if (tableRule?.access === "deny") {
       const auditId = await this.logDenied(tool, table, params, started, "Table access denied by policy");
       return { denied: true, reason: `Access to table '${table}' is denied by gateway policy.`, auditId };
+    }
+
+    // 1.5. Rate limit kontrolü
+    const globalCheck = this.rateLimiter.check("global");
+    if (!globalCheck.allowed) {
+      const auditId = await this.logDenied(tool, table, params, started, "Global rate limit exceeded");
+      return {
+        denied: true,
+        reason: `Rate limit exceeded. Too many requests in the current window.`,
+        retryAfterMs: globalCheck.retryAfterMs,
+        auditId,
+      };
+    }
+
+    const tableCheck = this.rateLimiter.check(`table:${table}`);
+    if (!tableCheck.allowed) {
+      const auditId = await this.logDenied(tool, table, params, started, `Per-table rate limit exceeded: ${table}`);
+      return {
+        denied: true,
+        reason: `Rate limit exceeded for table '${table}'. Too many queries in the current window.`,
+        retryAfterMs: tableCheck.retryAfterMs,
+        auditId,
+      };
     }
 
     // 2. Maskeleme + row limiti
